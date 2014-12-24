@@ -30,7 +30,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -52,7 +51,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
     };
     private final PageListener pageListener = new PageListener();
     // @formatter:on
-    public OnPageChangeListener delegatePageListener;
+    public VerboseOnPageChangeListener delegatePageListener;
     private LinearLayout.LayoutParams defaultTabLayoutParams;
     private LinearLayout.LayoutParams expandedTabLayoutParams;
     private LinearLayout tabsContainer;
@@ -172,7 +171,7 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         notifyDataSetChanged();
     }
 
-    public void setOnPageChangeListener(OnPageChangeListener listener) {
+    public void setOnPageChangeListener(VerboseOnPageChangeListener listener) {
         this.delegatePageListener = listener;
     }
 
@@ -237,16 +236,16 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
         tab.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("PagerSlidingTabString", "Current Item = " + pager.getCurrentItem());
-                Log.d("PagerSlidingTabString", "Position = " + position);
+                int previous = pager.getCurrentItem();
 
-                if (position > pager.getCurrentItem() + 1 || position < pager.getCurrentItem() - 1) {
+                if (Math.abs(position - pager.getCurrentItem()) > 1) {
                     pager.setPageTransformer(false, null);
                     pager.setCurrentItem(position, false);
 
+                    delegatePageListener.onPageSkipped(previous, position);
+
                     if (mPageTransformer != null)
                         pager.setPageTransformer(true, mPageTransformer);
-
                 } else {
                     if (mPageTransformer != null)
                         pager.setPageTransformer(true, mPageTransformer);
@@ -586,7 +585,6 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             currentPosition = position;
             currentPositionOffset = positionOffset;
 
@@ -620,7 +618,9 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
                 delegatePageListener.onPageSelected(position);
             }
         }
-
     }
 
+    public interface VerboseOnPageChangeListener extends OnPageChangeListener {
+        public void onPageSkipped(int previousPosition, int position);
+    }
 }
