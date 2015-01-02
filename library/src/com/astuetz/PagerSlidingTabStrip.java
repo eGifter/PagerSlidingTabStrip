@@ -238,11 +238,12 @@ public class PagerSlidingTabStrip extends HorizontalScrollView {
             public void onClick(View v) {
                 int previous = pager.getCurrentItem();
 
-                if (Math.abs(position - pager.getCurrentItem()) > 1) {
+                if (Math.abs(position - previous) > 1) {
                     pager.setPageTransformer(false, null);
                     pager.setCurrentItem(position, false);
 
-                    delegatePageListener.onPageSkipped(previous, position);
+                    if (delegatePageListener != null)
+                        delegatePageListener.onPageSkipped(previous, position);
 
                     if (mPageTransformer != null)
                         pager.setPageTransformer(true, mPageTransformer);
